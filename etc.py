@@ -28,11 +28,13 @@ def run_algo(rew_avg, m, num_iter, num_trial) -> np.ndarray:
 
         for t in range(num_iter - 1):
             rew = get_reward(rew_avg)
+            # Choose arm
             if t <= m * k:
                 chosen_arm = t % k
                 # Calculate mean of each arm
                 num[chosen_arm] += 1
-                means[chosen_arm] += (rew[chosen_arm] - means[chosen_arm]) / num[chosen_arm]
+                means[chosen_arm] += (rew[chosen_arm] -
+                                      means[chosen_arm]) / num[chosen_arm]
             else:
                 chosen_arm = np.argmax(means)
             # Add regret to cumulation
@@ -50,10 +52,11 @@ if __name__ == '__main__':
     num_iter, num_trial = int(1e4), 30
     m = [10, 100, 200, 500, 1000]
 
-    # Choose suitable m
+    # Choose optimal m
     sorted_rew = np.sort(rew_avg)
     delta = sorted_rew[-1] - sorted_rew[0]
-    m_optim = max(1, math.ceil((4 / delta ** 2) * (math.log(num_iter * delta ** 2 / 4))))
+    m_optim = max(1, math.ceil((4 / delta ** 2) *
+                  (math.log(num_iter * delta ** 2 / 4))))
     m.append(m_optim)
     m.sort()
 

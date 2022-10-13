@@ -15,10 +15,8 @@ def get_reward(rew_avg) -> np.ndarray:
 
 def run_algo(rew_avg, num_iter, num_trial) -> np.ndarray:
     regret = np.zeros((num_trial, num_iter))
-    k = rew_avg.size
     max_arm = np.argmax(rew_avg)
 
-    # TODO: return a (num_trial x num_iter) matrix of cumulative regrets for each trial.
     for i in range(num_trial):
         means = np.zeros(rew_avg.size)
         num = np.zeros(rew_avg.size)
@@ -30,19 +28,21 @@ def run_algo(rew_avg, num_iter, num_trial) -> np.ndarray:
             print('Trial number = ', i + 1)
 
         for t in range(num_iter - 1):
+            time += 1
             rew = get_reward(rew_avg)
+            # Choose arm
             chosen_arm = np.argmax(ucb_arr)
-
+            # Add regret to cumulation
             reg = rew[max_arm] - rew[chosen_arm]
             reg += cum[-1]
             cum.append(reg)
-
+            # Calculate mean of each arm
             num[chosen_arm] += 1
-            means[chosen_arm] = (means[chosen_arm] * (num[chosen_arm] - 1) + rew[chosen_arm]) / num[chosen_arm]
-            time += 1
+            means[chosen_arm] = (
+                means[chosen_arm] * (num[chosen_arm] - 1) + rew[chosen_arm]) / num[chosen_arm]
 
             func = 2 * np.log(1 + time * ((np.log(time)) ** 2))
-            for j in range(k):
+            for j in range(rew_avg.size):
                 if num[j] == 0:
                     continue
                 else:
@@ -62,20 +62,9 @@ if __name__ == '__main__':
     avg_reg = np.mean(reg, axis=0)
 
     # Plot results.
-    # TODO: plot cumulative regret vs. iteration number
-
-    # Normal scale
     plt.plot(avg_reg, label="UCB Avg. Regret")
     plt.xlabel('iterations')
     plt.ylabel('cumulative regret')
     plt.title('Cumulative Regret with UCB Bandit')
-    plt.legend()
-    plt.show()
-
-    # # Log scale x-axis
-    plt.semilogx(avg_reg, label="UCB Avg. Regret")
-    plt.xlabel('iterations')
-    plt.ylabel('cumulative regret')
-    plt.title('Cumulative Regret with UCB Bandit (Semilogx)')
     plt.legend()
     plt.show()
